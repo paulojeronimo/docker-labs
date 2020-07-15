@@ -1,0 +1,70 @@
+= jwilder/nginx-proxy labs
+
+== Lab 1
+
+----
+$ ./test.sh up -d # will start docker-compose as is configured.
+
+$ ./test.sh virtual-host-add
+
+$ grep whoami.local /etc/hosts
+127.0.0.1	whoami.local
+
+$ time ./test.sh curl-1
++ curl whoami.local
+I'm ae9140f9d2f5
+
+real	0m5.353s
+user	0m0.010s
+sys	0m0.014s
+
+$ time ./test.sh curl-2
++ curl -H 'Host: whoami.local' localhost
+I'm ae9140f9d2f5
+
+real	0m0.041s
+user	0m0.009s
+sys	0m0.013s
+
+$ ./test.sh down -v # will stop docker-compose
+
+$ ./test.sh virtual-host-del
+----
+
+== Lab 2
+
+----
+$ export VIRTUAL_HOST=whoami.example
+
+$ ./test.sh virtual-host-add
+
+$ grep $VIRTUAL_HOST /etc/hosts
+
+$ ./test.sh up -d
+jwilder--nginx-proxy_nginx-proxy_1 is up-to-date
+Recreating jwilder--nginx-proxy_whoami_1 ... done
+
+$ time ./test.sh curl-1
++ curl whoami.example
+I'm fce19998bb1f
+
+real	0m0.242s
+user	0m0.010s
+sys	0m0.014s
+
+$ time ./test.sh curl-2
++ curl -H 'Host: whoami.example' localhost
+I'm fce19998bb1f
+real	0m0.037s
+user	0m0.009s
+sys	0m0.013s
+
+$ ./test.sh down -v
+
+$ ./test.sh virtual-host-del
+----
+
+== References
+
+* https://github.com/nginx-proxy/nginx-proxy[jwilder/nginx-proxy^]
+* https://tools.ietf.org/html/rfc2606[Reserved Top Level DNS Names^]
