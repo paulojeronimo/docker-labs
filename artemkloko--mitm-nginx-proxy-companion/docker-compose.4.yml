@@ -1,0 +1,54 @@
+version: '3.3'
+
+services:
+
+  nginx-proxy-mitm:
+    command: mitmdump --ssl-insecure
+    dns:
+      - 127.0.0.1
+    image: artemkloko/mitm-nginx-proxy-companion
+    ports:
+      - 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  nginx-proxy:
+    depends_on:
+      - certs
+    image: jwilder/nginx-proxy
+    labels:
+      - "mitmproxy.proxyVirtualHosts=true"
+    volumes:
+      - certs:/etc/nginx/certs:ro
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+
+  certs:
+    environment:
+      - CA_CERT=/certs/self-signed.crt
+      - CA_KEY=/certs/self-signed.key
+      - CA_EXPIRE=3650
+      - SSL_SIZE=2048
+    image: paulczar/omgwtfssl
+    volumes:
+      - certs:/certs
+
+  example-one:
+    environment:
+      CERT_NAME: self-signed
+      HTTPS_METHOD: noredirect
+      VIRTUAL_HOST: example-one.com
+    image: nginx:alpine
+    volumes:
+      - ./example-one/index.html:/usr/share/nginx/html/index.html
+
+  example-two:
+    environment:
+      CERT_NAME: self-signed
+      HTTPS_METHOD: noredirect
+      VIRTUAL_HOST: example-two.net
+    image: nginx:alpine
+    volumes:
+      - ./example-two/index.html:/usr/share/nginx/html/index.html
+
+volumes:
+  certs:

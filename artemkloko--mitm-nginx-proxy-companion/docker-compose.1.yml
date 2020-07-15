@@ -1,0 +1,17 @@
+version: '3.3'
+
+services:
+
+  example-one:
+    image: nginx:alpine
+    ports:
+      - 8000:80
+    volumes:
+      - ./example-one/index.html:/usr/share/nginx/html/index.html
+
+  example-two:
+    image: nginx:alpine
+    ports:
+      - 9000:80
+    volumes:
+      - ./example-two/index.html:/usr/share/nginx/html/index.html
